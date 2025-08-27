@@ -6,6 +6,7 @@ use App\Models\Task;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\TaskResource;
+use Illuminate\Support\Facades\Gate;
 use App\Http\Requests\StoreTaskRequest;
 use App\Http\Requests\UpdateTaskRequest;
 
@@ -16,9 +17,7 @@ class TaskController extends Controller
      */
     public function index()
     {
-        if ($request->user()->cannot('viewAny', Task::class)) {
-            abort(403);
-        }
+        Gate::authorize('viewAny', Task::class);
 
         // return TaskResource::collection(Task::all());
         return request()->user()
@@ -32,9 +31,7 @@ class TaskController extends Controller
      */
     public function store(StoreTaskRequest $request)
     {
-        if ($request->user()->cannot('create', Task::class)) {
-            abort(403);
-        }
+        Gate::authorize('create', Task::class);
         
         $task = $request->user()->tasks()->create($request->validated());
 
@@ -44,11 +41,9 @@ class TaskController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Task $task, Request $request)
+    public function show(Task $task)
     {
-        if ($request->user()->cannot('view', $task)) {
-            abort(403);
-        }
+        Gate::authorize('view', $task);
 
         return $task->toResource();
     }
@@ -58,9 +53,7 @@ class TaskController extends Controller
      */
     public function update(UpdateTaskRequest $request, Task $task)
     {
-        if ($request->user()->cannot('update', $task)) {
-            abort(403);
-        }
+        Gate::authorize('update', $task);
 
         $task->update($request->validated());
 
@@ -70,11 +63,9 @@ class TaskController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Task $task, Request $request)
+    public function destroy(Task $task)
     {
-        if ($request->user()->cannot('delete', $task)) {
-            abort(403);
-        }
+        Gate::authorize('delete', $task);
 
         $task->delete();
 
