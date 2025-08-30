@@ -55,10 +55,19 @@ class User extends Authenticatable
         return $this->hasMany(Task::class);
     }
 
-    public function tasksSummary(): Collection
+    public function tasksSummary(?string $period = null): Collection
     {
+        [$start, $end] = match ($period) {
+            'today' => [now()->startOfDay(), now()->endOfDay()],
+            'yesterday' => [now()->subDay()->startOfDay(), now()->subDay()->endOfDay()],
+            'lastweek', 'last-week' => [now()->subWeek()->startOfWeek(), now()->subWeek()->endOfWeek()],
+            'thismonth', 'this-month' => [now()->startOfMonth(), now()->endOfMonth()],
+            'lastmonth', 'last-month' => [now()->startOfMonth()->subMonthsNoOverflow(), now()->subMonthsNoOverflow()->endOfMonth()],
+            default => [now()->startOfWeek(), now()->endOfWeek()],
+        };
+
         return $this->tasks()
-            ->where('created_at', '>=', now()->subWeek())
+            ->whereBetween('created_at', [$start, $end])
             ->latest()
             ->get();
     }
