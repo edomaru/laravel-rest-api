@@ -27,6 +27,7 @@ class DatabaseSeeder extends Seeder
 
                     Task::factory()
                         ->withRandomPriority()
+                        ->withRandomDueDate()
                         ->create([
                             'user_id' => $user->id,
                             'created_at' => $date,
