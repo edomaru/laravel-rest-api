@@ -26,6 +26,7 @@ class StoreTaskRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'priority_id' => ['nullable', Rule::exists(Priority::class, 'id')],
+            'due_date' => ['nullable', 'date']
         ];
     }
 }
