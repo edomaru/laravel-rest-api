@@ -15,6 +15,10 @@ class TaskController extends Controller
      */
     public function index()
     {
+        if (request()->user()->cannot('viewAny', Task::class)) {
+            abort(403);
+        }
+
         // return TaskResource::collection(Task::all());
         return request()->user()
             ->tasks()
@@ -35,6 +39,10 @@ class TaskController extends Controller
      */
     public function store(StoreTaskRequest $request)
     {
+        if ($request->user()->cannot('create', Task::class)) {
+            abort(403);
+        }
+
         // $task = Task::create($request->validated() + ['user_id' => $request->user()->id]);
         $task = $request->user()->tasks()->create($request->validated());
 
@@ -46,6 +54,10 @@ class TaskController extends Controller
      */
     public function show(Task $task)
     {
+        if (request()->user()->cannot('view', $task)) {
+            abort(403);
+        }
+
         // return new TaskResource($task);
         // return TaskResource::make($task);
         return $task->toResource();
@@ -64,6 +76,10 @@ class TaskController extends Controller
      */
     public function update(UpdateTaskRequest $request, Task $task)
     {
+        if ($request->user()->cannot('update', $task)) {
+            abort(403);
+        }
+
         $task->update($request->validated());
 
         return $task->toResource();
@@ -74,6 +90,10 @@ class TaskController extends Controller
      */
     public function destroy(Task $task)
     {
+        if (request()->user()->cannot('delete', $task)) {
+            abort(403);
+        }
+
         $task->delete();
 
         return response()->noContent();
