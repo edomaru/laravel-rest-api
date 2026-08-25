@@ -7,10 +7,13 @@ use App\Http\Requests\StoreTaskRequest;
 use App\Http\Requests\UpdateTaskRequest;
 use App\Http\Resources\TaskResource;
 use App\Models\Task;
+use App\Services\TaskInputParser;
 use Illuminate\Support\Facades\Gate;
 
 class TaskController extends Controller
 {
+    public function __construct(protected TaskInputParser $parser) {}
+    
     /**
      * Display a listing of the resource.
      */
@@ -36,6 +39,17 @@ class TaskController extends Controller
         //
     }
 
+    private function prepareData(array $data): array
+    {
+        $parsed = $this->parser->parse($data['name']);
+        if ($parsed) {
+            $data['name'] = $parsed['name'];
+            $data['priority_id'] = $data['priority_id'] ?? ($parsed['priority_id'] ?? null);
+            $data['due_date'] = $data['due_date'] ?? ($parsed['due_date'] ?? null);
+        }
+        return $data;
+    }
+
     /**
      * Store a newly created resource in storage.
      */
@@ -44,7 +58,10 @@ class TaskController extends Controller
         Gate::authorize('create', Task::class);
 
         // $task = Task::create($request->validated() + ['user_id' => $request->user()->id]);
-        $task = $request->user()->tasks()->create($request->validated());
+        $data = $request->validated();
+        $task = $request->user()->tasks()->create(
+            $this->prepareData($data)
+        );
         $task->load('priority');
 
         return $task->toResource();
@@ -78,7 +95,9 @@ class TaskController extends Controller
     {
         Gate::authorize('update', $task);
 
-        $task->update($request->validated());
+        $task->update(
+            $this->prepareData($request->validated())
+        );
         $task->load('priority');
 
         return $task->toResource();
