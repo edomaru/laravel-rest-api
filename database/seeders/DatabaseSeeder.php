@@ -17,7 +17,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         User::factory(5)
-            ->has(Task::factory()->count(10))
+            ->has(Task::factory()->count(10)->withRandomPriority())
             ->create();
     }
 }
