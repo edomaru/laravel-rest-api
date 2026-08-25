@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Models\Priority;
 use App\Models\Task;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -35,6 +36,22 @@ class TaskFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'priority_id' => rand(0, 1) === 0 ? NULL : Priority::pluck('id')->random(),
+        ]);
+    }
+
+    public function withDueDate(Carbon $date): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'due_date' => $date,
+        ]);
+    }
+
+    public function withRandomDueDate(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'due_date' => rand(0, 1) === 0 ? 
+                NULL : 
+                fake()->dateTimeBetween('-1 week', '+1 week'),
         ]);
     }
 }
