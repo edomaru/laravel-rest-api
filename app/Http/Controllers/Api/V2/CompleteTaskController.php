@@ -6,17 +6,16 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\CompleteTaskRequest;
 use App\Models\Task;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Gate;
+use Illuminate\Routing\Attributes\Controllers\Authorize;
 
 class CompleteTaskController extends Controller
 {
     /**
      * Handle the incoming request.
      */
+    #[Authorize('update', 'task')]
     public function __invoke(CompleteTaskRequest $request, Task $task)
     {
-        Gate::authorize('update', $task);
-
         $task->is_completed = $request->is_completed;
         $task->save();
 
